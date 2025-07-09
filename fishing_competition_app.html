@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fishing Competition Tracker</title>
+    <title>SI Chandhaa Masvaadha</title>
     <style>
         * {
             margin: 0;
@@ -162,6 +162,22 @@
             opacity: 0.8;
         }
 
+        .anglers-list {
+            margin-top: 5px;
+        }
+
+        .angler-stat {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
         .score {
             font-size: 1.5rem;
             font-weight: bold;
@@ -238,8 +254,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎣 Fishing Competition</h1>
-            <p>Track catches and view leaderboards</p>
+            <h1>🎣 SI Chandhaa Masvaadha</h1>
+            <p>Molhu keyolhu leaderboards</p>
         </div>
 
         <div class="tab-buttons">
@@ -260,7 +276,7 @@
                             <option value="">Select Team</option>
                             <option value="VIGANI">VIGANI</option>
                             <option value="REDHAN">REDHAN</option>
-                            <option value="ZALSALAA">ZALSALAA</option>
+                            <option value="ZALZALAA">ZALZALAA</option>
                         </select>
                     </div>
                     
@@ -374,8 +390,8 @@
                 members: ['RAMBO', 'SIMATTE', 'RAPPE', 'SIMAAH.Y', 'MAC', 'HUZAAM', 'SAMEER', 'FIYO', 'MANNU', 'CHOPS', 'ATHYG SIR', 'ADAM SIR'], 
                 count: 0 
             },
-            'ZALSALAA': { 
-                name: 'ZALSALAA', 
+            'ZALZALAA': { 
+                name: 'ZALZALAA', 
                 members: ['SHUJA', 'NOVA', 'JAMBO', 'SHAMIR', 'SAMAREY', 'SHAAD', 'MIDDE', 'MOOMIN', 'WADDE', 'NAASIR SIR', 'AMAN SIR', 'SAPPE'], 
                 count: 0 
             }
@@ -405,8 +421,8 @@
                         members: ['RAMBO', 'SIMATTE', 'RAPPE', 'SIMAAH.Y', 'MAC', 'HUZAAM', 'SAMEER', 'FIYO', 'MANNU', 'CHOPS', 'ATHYG SIR', 'ADAM SIR'], 
                         count: 0 
                     },
-                    'ZALSALAA': { 
-                        name: 'ZALSALAA', 
+                    'ZALZALAA': { 
+                        name: 'ZALZALAA', 
                         members: ['SHUJA', 'NOVA', 'JAMBO', 'SHAMIR', 'SAMAREY', 'SHAAD', 'MIDDE', 'MOOMIN', 'WADDE', 'NAASIR SIR', 'AMAN SIR', 'SAPPE'], 
                         count: 0 
                     }
@@ -437,8 +453,8 @@
                         members: ['RAMBO', 'SIMATTE', 'RAPPE', 'SIMAAH.Y', 'MAC', 'HUZAAM', 'SAMEER', 'FIYO', 'MANNU', 'CHOPS', 'ATHYG SIR', 'ADAM SIR'], 
                         count: 0 
                     },
-                    'ZALSALAA': { 
-                        name: 'ZALSALAA', 
+                    'ZALZALAA': { 
+                        name: 'ZALZALAA', 
                         members: ['SHUJA', 'NOVA', 'JAMBO', 'SHAMIR', 'SAMAREY', 'SHAAD', 'MIDDE', 'MOOMIN', 'WADDE', 'NAASIR SIR', 'AMAN SIR', 'SAPPE'], 
                         count: 0 
                     }
@@ -518,9 +534,8 @@
             
             catches.push(catch_data);
             
-            // Update team data
+            // Update team count (using the count for compatibility)
             teams[team].count++;
-            // Note: We don't need to add to members array since it's pre-populated
             
             // Save to localStorage
             saveData();
@@ -551,20 +566,64 @@
 
         function updateTeamLeaderboard() {
             const teamLeaderboard = document.getElementById('team-leaderboard');
-            const sortedTeams = Object.values(teams).sort((a, b) => b.count - a.count);
+            
+            // Calculate angler stats for each team
+            const teamStats = {};
+            Object.keys(teams).forEach(teamName => {
+                teamStats[teamName] = {
+                    name: teamName,
+                    totalCount: 0,
+                    anglers: {}
+                };
+                
+                // Initialize all team members with 0 count
+                teams[teamName].members.forEach(member => {
+                    teamStats[teamName].anglers[member] = 0;
+                });
+            });
+            
+            // Count catches per angler
+            catches.forEach(catch_data => {
+                const teamName = catch_data.team;
+                const anglerName = catch_data.angler;
+                
+                if (teamStats[teamName]) {
+                    teamStats[teamName].totalCount++;
+                    teamStats[teamName].anglers[anglerName]++;
+                }
+            });
+            
+            // Sort teams by total count
+            const sortedTeams = Object.values(teamStats).sort((a, b) => b.totalCount - a.totalCount);
             
             teamLeaderboard.innerHTML = '';
             
             sortedTeams.forEach((team, index) => {
                 const teamCard = document.createElement('div');
-                teamCard.className = `team-card ${index === 0 && team.count > 0 ? 'winner' : ''}`;
+                teamCard.className = `team-card ${index === 0 && team.totalCount > 0 ? 'winner' : ''}`;
+                
+                // Sort anglers by their catch count
+                const sortedAnglers = Object.entries(team.anglers)
+                    .sort((a, b) => b[1] - a[1])
+                    .filter(([name, count]) => count > 0 || team.totalCount === 0); // Show all if no catches, only active if there are catches
+                
+                let anglersDisplay = '';
+                if (team.totalCount === 0) {
+                    anglersDisplay = '<div class="team-members">No catches yet</div>';
+                } else {
+                    anglersDisplay = sortedAnglers.map(([angler, count]) => 
+                        `<div class="angler-stat">${angler}: ${count}</div>`
+                    ).join('');
+                }
                 
                 teamCard.innerHTML = `
                     <div class="team-info">
                         <div class="team-name">${team.name}</div>
-                        <div class="team-members">${team.members.join(', ') || 'No members yet'}</div>
+                        <div class="anglers-list">
+                            ${anglersDisplay}
+                        </div>
                     </div>
-                    <div class="score">${team.count}</div>
+                    <div class="score">${team.totalCount}</div>
                 `;
                 
                 teamLeaderboard.appendChild(teamCard);
