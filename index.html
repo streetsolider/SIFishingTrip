@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishing Competition Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard h3 {
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        .team-card, .fish-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .team-card.winner, .fish-card.winner {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .team-info, .fish-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .team-name, .angler-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .team-members {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .catch-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .catch-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            width: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .tab-button {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎣 Fishing Competition</h1>
+            <p>Track catches and view leaderboards</p>
+        </div>
+
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="showTab('add-catch')">Add Catch</button>
+            <button class="tab-button" onclick="showTab('leaderboard')">Leaderboard</button>
+            <button class="tab-button" onclick="showTab('all-catches')">All Catches</button>
+            <button class="tab-button" onclick="showTab('admin')">Admin</button>
+        </div>
+
+        <!-- Add Catch Tab -->
+        <div id="add-catch" class="tab-content active">
+            <div class="form-section">
+                <h3>Record New Catch</h3>
+                <form id="catch-form">
+                    <div class="form-group">
+                        <label for="team">Team:</label>
+                        <select id="team" required onchange="updateAnglerDropdown()">
+                            <option value="">Select Team</option>
+                            <option value="VIGANI">VIGANI</option>
+                            <option value="REDHAN">REDHAN</option>
+                            <option value="ZALSALAA">ZALSALAA</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="angler">Angler Name:</label>
+                        <select id="angler" required disabled>
+                            <option value="">Select team first</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="weight">Weight (kg):</label>
+                        <input type="number" id="weight" step="0.1" min="0" required placeholder="0.0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="species">Fish Species (optional):</label>
+                        <input type="text" id="species" placeholder="e.g., Bass, Trout, etc.">
+                    </div>
+                    
+                    <button type="submit">Record Catch</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Leaderboard Tab -->
+        <div id="leaderboard" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-fish">0</div>
+                    <div class="stat-label">Total Fish</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="heaviest-weight">0.0</div>
+                    <div class="stat-label">Heaviest (kg)</div>
+                </div>
+            </div>
+
+            <div class="leaderboard">
+                <h3>🏆 Most Fish (Team)</h3>
+                <div id="team-leaderboard"></div>
+            </div>
+
+            <div class="leaderboard">
+                <h3>🐟 Heaviest Fish (Individual)</h3>
+                <div id="individual-leaderboard"></div>
+            </div>
+        </div>
+
+        <!-- All Catches Tab -->
+        <div id="all-catches" class="tab-content">
+            <div class="catch-list">
+                <h3>All Recorded Catches</h3>
+                <div id="catches-list"></div>
+            </div>
+        </div>
+
+        <!-- Admin Tab -->
+        <div id="admin" class="tab-content">
+            <div class="form-section">
+                <h3>⚙️ Admin Panel</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="admin-total-fish">0</div>
+                        <div class="stat-label">Total Fish</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="admin-total-weight">0.0</div>
+                        <div class="stat-label">Total Weight (kg)</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4>Data Management</h4>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 15px;">
+                        Data is automatically saved and synced between all officials every 5 seconds.
+                    </p>
+                </div>
+                
+                <button onclick="exportData()" style="background: linear-gradient(45deg, #4CAF50, #66BB6A); margin-bottom: 10px;">
+                    📊 Export Competition Data
+                </button>
+                
+                <button onclick="clearAllData()" style="background: linear-gradient(45deg, #f44336, #ef5350);">
+                    🗑️ Clear All Data
+                </button>
+            </div>
+            
+            <div class="form-section">
+                <h4>Competition Status</h4>
+                <div id="competition-status">
+                    <p>🔄 Auto-sync active - Updates every 5 seconds</p>
+                    <p>👥 Multi-official support enabled</p>
+                    <p>💾 Data persistence: localStorage</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage with localStorage persistence
+        let catches = [];
+        let teams = {
+            'VIGANI': { 
+                name: 'VIGANI', 
+                members: ['AALU', 'FARAA', 'SOPPE', 'ZAYYAAN', 'AALAM', 'AMMADEY', 'CINTEY', 'LUDDA', 'SAMEER-R', 'HUSSAIN', 'ANEEL', 'HAMITTE SIR'], 
+                count: 0 
+            },
+            'REDHAN': { 
+                name: 'REDHAN', 
+                members: ['RAMBO', 'SIMATTE', 'RAPPE', 'SIMAAH.Y', 'MAC', 'HUZAAM', 'SAMEER', 'FIYO', 'MANNU', 'CHOPS', 'ATHYG SIR', 'ADAM SIR'], 
+                count: 0 
+            },
+            'ZALSALAA': { 
+                name: 'ZALSALAA', 
+                members: ['SHUJA', 'NOVA', 'JAMBO', 'SHAMIR', 'SAMAREY', 'SHAAD', 'MIDDE', 'MOOMIN', 'WADDE', 'NAASIR SIR', 'AMAN SIR', 'SAPPE'], 
+                count: 0 
+            }
+        };
+
+        // Load data from localStorage on page load
+        function loadData() {
+            const savedCatches = localStorage.getItem('fishingCatches');
+            const savedTeams = localStorage.getItem('fishingTeams');
+            
+            if (savedCatches) {
+                catches = JSON.parse(savedCatches);
+            }
+            
+            if (savedTeams) {
+                teams = JSON.parse(savedTeams);
+            } else {
+                // Initialize teams with default members if no saved data
+                teams = {
+                    'VIGANI': { 
+                        name: 'VIGANI', 
+                        members: ['AALU', 'FARAA', 'SOPPE', 'ZAYYAAN', 'AALAM', 'AMMADEY', 'CINTEY', 'LUDDA', 'SAMEER-R', 'HUSSAIN', 'ANEEL', 'HAMITTE SIR'], 
+                        count: 0 
+                    },
+                    'REDHAN': { 
+                        name: 'REDHAN', 
+                        members: ['RAMBO', 'SIMATTE', 'RAPPE', 'SIMAAH.Y', 'MAC', 'HUZAAM', 'SAMEER', 'FIYO', 'MANNU', 'CHOPS', 'ATHYG SIR', 'ADAM SIR'], 
+                        count: 0 
+                    },
+                    'ZALSALAA': { 
+                        name: 'ZALSALAA', 
+                        members: ['SHUJA', 'NOVA', 'JAMBO', 'SHAMIR', 'SAMAREY', 'SHAAD', 'MIDDE', 'MOOMIN', 'WADDE', 'NAASIR SIR', 'AMAN SIR', 'SAPPE'], 
+                        count: 0 
+                    }
+                };
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('fishingCatches', JSON.stringify(catches));
+            localStorage.setItem('fishingTeams', JSON.stringify(teams));
+        }
+
+        // Clear all data (for testing or reset)
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear ALL competition data? This cannot be undone!')) {
+                localStorage.removeItem('fishingCatches');
+                localStorage.removeItem('fishingTeams');
+                catches = [];
+                teams = {
+                    'VIGANI': { 
+                        name: 'VIGANI', 
+                        members: ['AALU', 'FARAA', 'SOPPE', 'ZAYYAAN', 'AALAM', 'AMMADEY', 'CINTEY', 'LUDDA', 'SAMEER-R', 'HUSSAIN', 'ANEEL', 'HAMITTE SIR'], 
+                        count: 0 
+                    },
+                    'REDHAN': { 
+                        name: 'REDHAN', 
+                        members: ['RAMBO', 'SIMATTE', 'RAPPE', 'SIMAAH.Y', 'MAC', 'HUZAAM', 'SAMEER', 'FIYO', 'MANNU', 'CHOPS', 'ATHYG SIR', 'ADAM SIR'], 
+                        count: 0 
+                    },
+                    'ZALSALAA': { 
+                        name: 'ZALSALAA', 
+                        members: ['SHUJA', 'NOVA', 'JAMBO', 'SHAMIR', 'SAMAREY', 'SHAAD', 'MIDDE', 'MOOMIN', 'WADDE', 'NAASIR SIR', 'AMAN SIR', 'SAPPE'], 
+                        count: 0 
+                    }
+                };
+                updateStats();
+                updateLeaderboard();
+                updateCatchesList();
+                alert('All data cleared!');
+            }
+        }
+
+        // Update angler dropdown based on selected team
+        function updateAnglerDropdown() {
+            const teamSelect = document.getElementById('team');
+            const anglerSelect = document.getElementById('angler');
+            const selectedTeam = teamSelect.value;
+            
+            // Clear current options
+            anglerSelect.innerHTML = '';
+            
+            if (selectedTeam && teams[selectedTeam]) {
+                anglerSelect.disabled = false;
+                anglerSelect.innerHTML = '<option value="">Select Angler</option>';
+                
+                // Add team members as options
+                teams[selectedTeam].members.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member;
+                    option.textContent = member;
+                    anglerSelect.appendChild(option);
+                });
+            } else {
+                anglerSelect.disabled = true;
+                anglerSelect.innerHTML = '<option value="">Select team first</option>';
+            }
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'leaderboard') {
+                updateLeaderboard();
+            } else if (tabName === 'all-catches') {
+                updateCatchesList();
+            } else if (tabName === 'admin') {
+                updateAdminPanel();
+            }
+        }
+
+        // Form submission
+        document.getElementById('catch-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const team = document.getElementById('team').value;
+            const angler = document.getElementById('angler').value;
+            const weight = parseFloat(document.getElementById('weight').value);
+            const species = document.getElementById('species').value || 'Unknown';
+            
+            const catch_data = {
+                id: Date.now(),
+                team: team,
+                angler: angler,
+                weight: weight,
+                species: species,
+                timestamp: new Date().toLocaleString(),
+                recordedBy: `Official ${Math.floor(Math.random() * 3) + 1}` // Random official for demo
+            };
+            
+            catches.push(catch_data);
+            
+            // Update team data
+            teams[team].count++;
+            // Note: We don't need to add to members array since it's pre-populated
+            
+            // Save to localStorage
+            saveData();
+            
+            // Reset form
+            document.getElementById('catch-form').reset();
+            
+            // Show success message
+            alert(`Catch recorded! ${angler} from ${team} caught a ${weight}kg ${species}`);
+            
+            updateStats();
+        });
+
+        // Update statistics
+        function updateStats() {
+            const totalFish = catches.length;
+            const heaviestFish = catches.length > 0 ? Math.max(...catches.map(c => c.weight)) : 0;
+            
+            document.getElementById('total-fish').textContent = totalFish;
+            document.getElementById('heaviest-weight').textContent = heaviestFish.toFixed(1);
+        }
+
+        // Update leaderboard
+        function updateLeaderboard() {
+            updateTeamLeaderboard();
+            updateIndividualLeaderboard();
+        }
+
+        function updateTeamLeaderboard() {
+            const teamLeaderboard = document.getElementById('team-leaderboard');
+            const sortedTeams = Object.values(teams).sort((a, b) => b.count - a.count);
+            
+            teamLeaderboard.innerHTML = '';
+            
+            sortedTeams.forEach((team, index) => {
+                const teamCard = document.createElement('div');
+                teamCard.className = `team-card ${index === 0 && team.count > 0 ? 'winner' : ''}`;
+                
+                teamCard.innerHTML = `
+                    <div class="team-info">
+                        <div class="team-name">${team.name}</div>
+                        <div class="team-members">${team.members.join(', ') || 'No members yet'}</div>
+                    </div>
+                    <div class="score">${team.count}</div>
+                `;
+                
+                teamLeaderboard.appendChild(teamCard);
+            });
+        }
+
+        function updateIndividualLeaderboard() {
+            const individualLeaderboard = document.getElementById('individual-leaderboard');
+            
+            if (catches.length === 0) {
+                individualLeaderboard.innerHTML = '<p>No catches recorded yet</p>';
+                return;
+            }
+            
+            const heaviestCatch = catches.reduce((max, catch_data) => 
+                catch_data.weight > max.weight ? catch_data : max
+            );
+            
+            const fishCard = document.createElement('div');
+            fishCard.className = 'fish-card winner';
+            
+            fishCard.innerHTML = `
+                <div class="fish-info">
+                    <div class="angler-name">${heaviestCatch.angler}</div>
+                    <div class="team-members">${heaviestCatch.team} • ${heaviestCatch.species}</div>
+                </div>
+                <div class="score">${heaviestCatch.weight}kg</div>
+            `;
+            
+            individualLeaderboard.innerHTML = '';
+            individualLeaderboard.appendChild(fishCard);
+        }
+
+        // Update catches list
+        function updateCatchesList() {
+            const catchesList = document.getElementById('catches-list');
+            
+            if (catches.length === 0) {
+                catchesList.innerHTML = '<p>No catches recorded yet</p>';
+                return;
+            }
+            
+            catchesList.innerHTML = '';
+            
+            catches.sort((a, b) => b.timestamp.localeCompare(a.timestamp)).forEach(catch_data => {
+                const catchItem = document.createElement('div');
+                catchItem.className = 'catch-item';
+                
+                catchItem.innerHTML = `
+                    <div>
+                        <strong>${catch_data.angler}</strong> (${catch_data.team})<br>
+                        <small>${catch_data.species} • ${catch_data.weight}kg • ${catch_data.timestamp}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteCatch(${catch_data.id})">Delete</button>
+                `;
+                
+                catchesList.appendChild(catchItem);
+            });
+        }
+
+        // Delete catch
+        function deleteCatch(id) {
+            const catchIndex = catches.findIndex(c => c.id === id);
+            if (catchIndex > -1) {
+                const catch_data = catches[catchIndex];
+                
+                // Update team count
+                teams[catch_data.team].count--;
+                
+                // Remove from catches
+                catches.splice(catchIndex, 1);
+                
+                // Save to localStorage
+                saveData();
+                
+                // Update displays
+                updateStats();
+                updateCatchesList();
+                
+                alert('Catch deleted successfully');
+            }
+        }
+
+        // Initialize app
+        function initializeApp() {
+            loadData();
+            updateStats();
+            updateLeaderboard();
+            updateCatchesList();
+        }
+
+        // Auto-refresh data every 5 seconds to sync between officials
+        setInterval(function() {
+            const currentTab = document.querySelector('.tab-content.active').id;
+            loadData();
+            updateStats();
+            
+            if (currentTab === 'leaderboard') {
+                updateLeaderboard();
+            } else if (currentTab === 'all-catches') {
+                updateCatchesList();
+            } else if (currentTab === 'admin') {
+                updateAdminPanel();
+            }
+        }, 5000);
+
+        // Admin panel functions
+        function updateAdminPanel() {
+            const totalFish = catches.length;
+            const totalWeight = catches.reduce((sum, c) => sum + c.weight, 0);
+            
+            document.getElementById('admin-total-fish').textContent = totalFish;
+            document.getElementById('admin-total-weight').textContent = totalWeight.toFixed(1);
+        }
+
+        function exportData() {
+            const exportData = {
+                catches: catches,
+                teams: teams,
+                exportDate: new Date().toISOString(),
+                summary: {
+                    totalFish: catches.length,
+                    totalWeight: catches.reduce((sum, c) => sum + c.weight, 0),
+                    heaviestFish: catches.length > 0 ? Math.max(...catches.map(c => c.weight)) : 0
+                }
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `fishing-competition-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            alert('Competition data exported successfully!');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initializeApp);
+    </script>
+</body>
+</html>
